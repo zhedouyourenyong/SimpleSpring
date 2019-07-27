@@ -7,6 +7,8 @@ import framework.protocol.param.Param;
 import framework.protocol.response.impl.SimpleHttpResponse;
 import framework.protocol.resquest.impl.SimpleHttpRequest;
 
+import java.util.Map;
+
 /*
 * 管理当前线程的请求和响应
 * */
@@ -49,10 +51,16 @@ public final class Context
         httpResponse.setHttpContent(JSON.toJSONString(object));
     }
 
-    public void html(String html)
+    public void html(String htmlPath)
+    {
+        html(htmlPath,null);
+    }
+
+    public void html(String htmlPath, Map<String,Object> model)
     {
         httpResponse.setContentType(Constant.ContentType.HTML);
-        httpResponse.setHttpContent(html);
+        httpResponse.setHtmlPath(htmlPath);
+        httpResponse.setModel(model);
     }
 
     public void text(String text)

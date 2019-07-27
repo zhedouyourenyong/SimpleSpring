@@ -1,4 +1,4 @@
-package Test.service;
+package t_demo.service;
 
 import framework.annotation.Service;
 
@@ -9,5 +9,4 @@ public class serviceA
     {
         System.out.println("hello serviceA！");
     }
-
 }

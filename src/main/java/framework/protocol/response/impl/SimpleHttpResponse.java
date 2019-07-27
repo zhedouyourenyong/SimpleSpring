@@ -14,12 +14,12 @@ import java.util.Map;
 
 public class SimpleHttpResponse implements Response
 {
-    private Map<String, String> headers = new HashMap<>(8);
+    private Map<String, String> headers = new HashMap<>();
     private String httpContent;
     private String contentType;
     private String htmlPath;
     private Map<String,Object> model;
-    private List<Cookie> cookies = new ArrayList<>(6);
+    private List<Cookie> cookies = new ArrayList<>();
 
 
     private SimpleHttpResponse ()

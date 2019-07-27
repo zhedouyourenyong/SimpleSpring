@@ -1,10 +1,6 @@
 package framework.bootstrap;
 
-import Test.test;
-import framework.bean.impl.DefaultBeanFactory;
 import framework.config.AppConfig;
-import framework.interceptor.InterceptManager;
-import framework.route.RouterManager;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -69,19 +65,4 @@ public class NettyBootStrap
     {
         //todo
     }
-
-//    public static void main (String[] args)
-//    {
-//        try
-//        {
-//            String packagetName= test.class.getPackage().getName();
-//            DefaultBeanFactory.getInstance().init(packagetName);
-//            RouterManager.getInstance().init(packagetName);
-//            InterceptManager.getInstance().loadInterceptors(packagetName);
-//            NettyBootStrap.startup();
-//        } catch (Exception e)
-//        {
-//            e.printStackTrace();
-//        }
-//    }
 }

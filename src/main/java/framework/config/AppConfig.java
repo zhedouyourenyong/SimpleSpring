@@ -16,12 +16,16 @@ public final class AppConfig
     {
     }
 
-    private static AppConfig config;
+    private static volatile AppConfig config;
+
     public static AppConfig getInstance ()
     {
         if(config == null)
         {
-            config = new AppConfig();
+            synchronized (AppConfig.class)
+            {
+                config = new AppConfig();
+            }
         }
         return config;
     }
@@ -66,8 +70,8 @@ public final class AppConfig
      */
     public void checkRootPath (String uri, QueryStringDecoder queryStringDecoder) throws Exception
     {
-        String nowPath=PathUtil.getRootPath(queryStringDecoder.path());
-        String targetPath=this.getRootPath();
+        String nowPath = PathUtil.getRootPath(queryStringDecoder.path());
+        String targetPath = this.getRootPath();
         if(!nowPath.equals(targetPath))
         {
             throw new SimpleException(StatusEnum.REQUEST_ERROR, uri);

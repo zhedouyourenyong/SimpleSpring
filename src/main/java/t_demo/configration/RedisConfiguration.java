@@ -1,4 +1,4 @@
-package Test.configration;
+package t_demo.configration;
 
 import framework.annotation.Configuration;
 import framework.configuration.AbstractConfiguration;

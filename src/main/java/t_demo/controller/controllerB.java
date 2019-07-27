@@ -1,16 +1,14 @@
-package Test.controller;
+package t_demo.controller;
 
 
-import Test.configration.KafkaConfiguration;
-import Test.service.serviceA;
-import Test.service.serviceB;
+import t_demo.configration.KafkaConfiguration;
+import t_demo.service.serviceB;
 import com.alibaba.fastjson.JSONObject;
 import framework.annotation.AutoWired;
 import framework.annotation.Controller;
 import framework.annotation.RequestMapping;
 import framework.configuration.ConfigurationManager;
 import framework.context.Context;
-import framework.protocol.param.Param;
 
 import java.util.Properties;
 
@@ -26,7 +24,7 @@ public class controllerB
     }
 
     @RequestMapping(path = "/testB")
-    public void map1(Context context, Param param)
+    public void map1(Context context)
     {
         System.out.println("successB!");
 

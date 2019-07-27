@@ -16,12 +16,13 @@ import java.util.Set;
 
 public class RouterManager
 {
-    private static final Logger logger= LoggerFactory.getLogger(RouterManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(RouterManager.class);
 
-    private static Map<String, Method> routes = null;  //key  -->
+    private static Map<String, Method> routes = null;
 
     private AppConfig appConfig = AppConfig.getInstance();
     private volatile static RouterManager routerScanner;
+
     private RouterManager ()
     {
     }
@@ -41,57 +42,56 @@ public class RouterManager
         return routerScanner;
     }
 
-    public Method getProcessMethod(String path) throws Exception
-    {
-        Method method = routes.get(path);
-        if(method==null)
-            throw new SimpleException(StatusEnum.NOT_FOUND,path);
-
-        return method;
-    }
-
-    public void init(String packageName) throws Exception
+    public void init (String packageName) throws Exception
     {
         loadRouteMethods(packageName);
     }
 
+    public Method getProcessMethod (String path) throws Exception
+    {
+        Method method = routes.get(path);
+        if(method == null)
+            throw new SimpleException(StatusEnum.NOT_FOUND, path);
+
+        return method;
+    }
 
     private void loadRouteMethods (String packageName) throws Exception
     {
-        if(routes==null)
+        if(routes == null)
         {
-            routes=new HashMap<>(64);
+            routes = new HashMap<>(64);
         }
 
-        Map<String,Class<?>> controllerMap=ClassScanner.getControllerMap(packageName);
-        if(controllerMap!=null)
+        Map<String, Class<?>> controllerMap = ClassScanner.getControllerMap(packageName);
+        if(controllerMap != null && controllerMap.size() != 0)
         {
-            for(Map.Entry<String,Class<?>> entry:controllerMap.entrySet())
+            for (Map.Entry<String, Class<?>> entry : controllerMap.entrySet())
             {
-                String key=entry.getKey();
-                Class<?> value=entry.getValue();
+                String key = entry.getKey();
+                Class<?> value = entry.getValue();
 
-                Controller controller=value.getAnnotation(Controller.class);
+                Controller controller = value.getAnnotation(Controller.class);
                 Method[] declaredMethods = value.getMethods();
 
-                for(Method method:declaredMethods)
+                for (Method method : declaredMethods)
                 {
                     if(method.isAnnotationPresent(RequestMapping.class))
                     {
-                        RequestMapping annotation=method.getAnnotation(RequestMapping.class);
+                        RequestMapping annotation = method.getAnnotation(RequestMapping.class);
+                        String requestMapping = appConfig.getRootPath();
 
-                        String requestMapping=appConfig.getRootPath();
                         if(!controller.path().equals(""))
                         {
                             if(!controller.path().startsWith("/"))
-                                requestMapping+="/";
-                            requestMapping+=controller.path();
+                                requestMapping += "/";
+                            requestMapping += controller.path();
                         }
                         if(!annotation.path().equals(""))
                         {
                             if(!annotation.path().startsWith("/"))
-                                requestMapping+="/";
-                            requestMapping+=annotation.path();
+                                requestMapping += "/";
+                            requestMapping += annotation.path();
                         }
 
                         routes.put(requestMapping, method);

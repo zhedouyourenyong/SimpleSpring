@@ -1,4 +1,4 @@
-package Test.interceptor;
+package t_demo.interceptor;
 
 import framework.annotation.Interceptor;
 import framework.context.Context;
@@ -20,16 +20,16 @@ public class ExecuteTimeInterceptor extends SimpleInterceptor
 
     @Override
     public boolean before(Context context, Param param) {
-        start = System.currentTimeMillis();
-        System.out.println("拦截请求");
-        LOGGER.info("拦截请求");
+//        start = System.currentTimeMillis();
+//        System.out.println("拦截请求");
+//        LOGGER.info("拦截请求");
         return true;
     }
 
     @Override
     public void after(Context context,Param param) {
-        end = System.currentTimeMillis();
-        System.out.println("cast [{}] times:"+( end - start));
-        LOGGER.info("cast [{}] times", end - start);
+//        end = System.currentTimeMillis();
+//        System.out.println("cast [{}] times:"+( end - start));
+//        LOGGER.info("cast [{}] times", end - start);
     }
 }

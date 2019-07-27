@@ -1,6 +1,5 @@
 package framework.config;
 
-import Test.test;
 import framework.ApplicationServer;
 import framework.bean.impl.DefaultBeanFactory;
 import framework.configuration.AbstractConfiguration;
@@ -11,14 +10,11 @@ import framework.exception.SimpleException;
 import framework.interceptor.InterceptManager;
 import framework.route.RouterManager;
 import framework.scanner.ClassScanner;
+import framework.util.ReflectionUtil;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Properties;
-
-import static framework.configuration.ConfigurationManager.getConfiguration;
 
 public final class ApplicationInitSetting
 {
@@ -31,10 +27,10 @@ public final class ApplicationInitSetting
         setAppConfig(rootPath);
 
         //init route bean interceptor factory
-        String packagetName= clazz.getPackage().getName();
-        DefaultBeanFactory.getInstance().init(packagetName);
-        RouterManager.getInstance().init(packagetName);
-        InterceptManager.getInstance().loadInterceptors(packagetName);
+        String packageName= AppConfig.getInstance().getRootPackageName();
+        DefaultBeanFactory.getInstance().init(packageName);
+        RouterManager.getInstance().init(packageName);
+        InterceptManager.getInstance().loadInterceptors(packageName);
     }
 
 
@@ -56,6 +52,8 @@ public final class ApplicationInitSetting
         {
             throw new SimpleException("No [port] exists ");
         }
+
+
         AppConfig.getInstance().setRootPath(rootPath);
         AppConfig.getInstance().setPort(Integer.parseInt(port));
     }
@@ -68,7 +66,7 @@ public final class ApplicationInitSetting
         List<Class<?>> configuration = ClassScanner.getConfiguration(AppConfig.getInstance().getRootPackageName());
         for (Class<?> cls : configuration)
         {
-            AbstractConfiguration conf = (AbstractConfiguration) cls.newInstance();
+            AbstractConfiguration conf=(AbstractConfiguration) ReflectionUtil.newInstance(cls);
 
             String fileName=conf.getPropertiesName();
             InputStream stream = ApplicationServer.class.getClassLoader().getResourceAsStream(fileName);

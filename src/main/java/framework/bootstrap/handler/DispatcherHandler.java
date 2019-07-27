@@ -32,6 +32,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executors;
 
 
 @ChannelHandler.Sharable
@@ -109,17 +110,21 @@ public final class DispatcherHandler extends SimpleChannelInboundHandler<FullHtt
         ByteBuf buf = ctx.alloc().ioBuffer();
         String content = null;
 
-        if(httpResponse.getContentType() == Constant.ContentType.HTML)
+        if(httpResponse.getContentType().equals(Constant.ContentType.HTML))
         {
             String path = httpResponse.getHtmlPath();
+
             Map<String, Object> model = httpResponse.getModel();
+            if(model == null)
+                model = new HashMap<>(0);
+
             content = freemarkerUtil.processTemplateIntoString(path, model);
         } else  //text json
         {
             content = httpResponse.getHttpContent();
         }
 
-        buf.writeBytes(content.getBytes(StandardCharsets.UTF_8));
+        buf.writeBytes(content.getBytes(CharsetUtil.UTF_8));
         DefaultFullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, buf);
         buildHeader(response);
 
@@ -144,19 +149,18 @@ public final class DispatcherHandler extends SimpleChannelInboundHandler<FullHtt
     @Override
     public void exceptionCaught (ChannelHandlerContext ctx, Throwable cause) throws Exception
     {
-        if(SimpleException.isResetByPeer(cause.getMessage()))
+        Exception e = (Exception) cause;
+        if(SimpleException.isResetByPeer(e.getMessage()))
         {
             return;
         }
 
-        logger.error(cause.getMessage(),cause);
+        logger.error("Exception", e);
 
         WorkRes workRes = new WorkRes();
-        workRes.setCode(String.valueOf(HttpResponseStatus.NOT_FOUND.code()));
-        workRes.setMessage(cause.getMessage());
-
-        DefaultFullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NOT_FOUND, Unpooled.copiedBuffer(JSON.toJSONString(workRes), CharsetUtil.UTF_8));
-        buildHeader(response);
-        ctx.writeAndFlush(response);
+        workRes.setCode("500");
+        workRes.setMessage(e.getClass().getName() + "系统运行出现异常");
+        Context context = ContextManager.getContext();
+        context.json(workRes);
     }
 }

@@ -1,8 +1,10 @@
 package framework.bean.impl;
 
+import framework.annotation.Aspect;
 import framework.annotation.AutoWired;
 import framework.annotation.Resource;
 import framework.bean.BeanFactory;
+import framework.proxy.AbsMethodAdvance;
 import framework.scanner.ClassScanner;
 import framework.util.ReflectionUtil;
 import org.slf4j.Logger;
@@ -16,7 +18,7 @@ import java.util.Set;
 public class DefaultBeanFactory implements BeanFactory
 {
     private static final Logger logger = LoggerFactory.getLogger(DefaultBeanFactory.class);
-    private Map<String, Object> beans = new HashMap<>(16);  //key --> className
+    private Map<String, Object> beans = new HashMap<>(64);  //key --> className
 
 
     private static volatile DefaultBeanFactory defaultBeanFactory;
@@ -44,6 +46,7 @@ public class DefaultBeanFactory implements BeanFactory
     public void init (String packageName) throws Exception
     {
         startIOC(packageName);
+        startAOP(packageName);
         startDI();
     }
 
@@ -51,10 +54,45 @@ public class DefaultBeanFactory implements BeanFactory
     {
         Set<Class<?>> beanClasses = ClassScanner.getBeanClasses(packageName);
 
-        for (Class<?> cls : beanClasses)
+        if(beanClasses != null && beanClasses.size() != 0)
         {
-            Object object = ReflectionUtil.newInstance(cls);
-            register(object);
+            for (Class<?> cls : beanClasses)
+            {
+                Object object = ReflectionUtil.newInstance(cls);
+                register(object);
+            }
+        }
+    }
+
+    private void startAOP (String packageName) throws Exception
+    {
+        Map<String, Class<?>> proxyMap = ClassScanner.getProxyMap(packageName);
+        if(proxyMap != null && proxyMap.size() != 0)
+        {
+            for (Map.Entry<String, Class<?>> entry : proxyMap.entrySet())
+            {
+                String className = entry.getKey();
+                Class<?> cls = entry.getValue();
+
+                Aspect aspect = cls.getAnnotation(Aspect.class);
+                String pointCut = aspect.pointCut();
+                String[] arr = pointCut.split(",");
+
+                //目标类名
+                String targetClassName = arr[0];
+                //目标方法名
+                String targetMethodName = arr[1];
+
+                AbsMethodAdvance proxyer = (AbsMethodAdvance) ReflectionUtil.newInstance(cls);
+                proxyer.setProxyMethodName(targetMethodName);
+                Object targetBean = beans.get(targetClassName);
+
+                if(targetBean != null)
+                {
+                    Object object = proxyer.createProxyObject(targetBean);
+                    beans.put(targetClassName,object);
+                }
+            }
         }
     }
 
@@ -78,13 +116,14 @@ public class DefaultBeanFactory implements BeanFactory
                     Object fieldInstance = beans.get(fieldClass.getName());
                     if(fieldInstance != null)
                         ReflectionUtil.setField(value, field, fieldInstance);
-                } else if(field.isAnnotationPresent(Resource.class))
-                {
-                    Resource resource = field.getAnnotation(Resource.class);
-                    Object fieldInstance = beans.get(resource.name());
-                    if(fieldInstance != null)
-                        ReflectionUtil.setField(key, field, fieldInstance);
                 }
+//                } else if(field.isAnnotationPresent(Resource.class))
+//                {
+//                    Resource resource = field.getAnnotation(Resource.class);
+//                    Object fieldInstance = beans.get(resource.name());
+//                    if(fieldInstance != null)
+//                        ReflectionUtil.setField(key, field, fieldInstance);
+//                }
             }
         }
     }

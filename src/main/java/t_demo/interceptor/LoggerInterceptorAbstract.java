@@ -1,4 +1,4 @@
-package Test.interceptor;
+package t_demo.interceptor;
 
 import framework.annotation.Interceptor;
 import framework.context.Context;
@@ -16,15 +16,15 @@ public class LoggerInterceptorAbstract extends SimpleInterceptor
     @Override
     public boolean before (Context context, Param param)
     {
-        System.out.println("before "+param.toString());
-        LOGGER.info("before logger param=[{}]", param.toString());
+//        System.out.println("before "+param.toString());
+//        LOGGER.info("before logger param=[{}]", param.toString());
         return true;
     }
 
     @Override
     public void after (Context context, Param param)
     {
-        System.out.println("after "+param.toString());
-        LOGGER.info("after logger param=[{}]", param.toString());
+//        System.out.println("after "+param.toString());
+//        LOGGER.info("after logger param=[{}]", param.toString());
     }
 }

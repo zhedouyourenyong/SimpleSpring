@@ -1,9 +1,6 @@
 package framework.scanner;
 
-import framework.annotation.Configuration;
-import framework.annotation.Controller;
-import framework.annotation.Interceptor;
-import framework.annotation.Service;
+import framework.annotation.*;
 import framework.configuration.ApplicationConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,27 +19,29 @@ public class ClassScanner
     private static final Logger logger = LoggerFactory.getLogger(ClassScanner.class);
 
     private static Set<Class<?>> classes = null;
-    private static Set<Class<?>> beanClasses=null;  // controller service interceptor configuration
-    private static Map<String,Class<?>> controllerMap =null;
-    private static Map<String,Class<?>> serviceMap =null;
+    private static Set<Class<?>> beanClasses = null;  // controller service interceptor configuration
+
+    private static Map<String, Class<?>> controllerMap = null;
+    private static Map<String, Class<?>> serviceMap = null;
     private static Map<Class<?>, Integer> interceptorMap = null;
     private static List<Class<?>> configurationList = null;
+    private static Map<String, Class<?>> proxyMap = null;
 
 
     public static List<Class<?>> getConfiguration (String packageName) throws Exception
     {
-        if(configurationList==null)
+        if(configurationList == null)
         {
-            Set<Class<?>> beanSet=getBeanClasses(packageName);
-            configurationList=new ArrayList<>(8);
+            Set<Class<?>> beanSet = getBeanClasses(packageName);
+            configurationList = new ArrayList<>();
 
             //
             configurationList.add(ApplicationConfiguration.class);
 
-            if(beanSet==null||beanSet.isEmpty())
+            if(beanSet == null || beanSet.isEmpty())
                 return configurationList;
 
-            for(Class<?> cls:beanSet)
+            for (Class<?> cls : beanSet)
             {
                 if(cls.isAnnotationPresent(Configuration.class))
                 {
@@ -53,20 +52,40 @@ public class ClassScanner
         return configurationList;
     }
 
-    public static Map<String,Class<?>> getControllerMap(String packageName) throws Exception
+    public static Map<String, Class<?>> getProxyMap (String packageName) throws Exception
     {
-        if(controllerMap ==null)
+        if(proxyMap == null)
         {
-            Set<Class<?>> classes=getBeanClasses(packageName);
-            if(classes==null||classes.isEmpty())
+            Set<Class<?>> classes = getBeanClasses(packageName);
+            if(classes == null || classes.isEmpty())
+                return proxyMap;
+
+            proxyMap = new HashMap<>();
+            for (Class<?> cls : classes)
+            {
+                if(cls.isAnnotationPresent(Aspect.class))
+                {
+                    proxyMap.put(cls.getName(), cls);
+                }
+            }
+        }
+        return proxyMap;
+    }
+
+    public static Map<String, Class<?>> getControllerMap (String packageName) throws Exception
+    {
+        if(controllerMap == null)
+        {
+            Set<Class<?>> classes = getBeanClasses(packageName);
+            if(classes == null || classes.isEmpty())
                 return controllerMap;
 
-            controllerMap =new HashMap<>(64);
-            for (Class<?> cls:classes)
+            controllerMap = new HashMap<>();
+            for (Class<?> cls : classes)
             {
                 if(cls.isAnnotationPresent(Controller.class))
                 {
-                    controllerMap.put(cls.getName(),cls);
+                    controllerMap.put(cls.getName(), cls);
 //                    Controller controller=cls.getAnnotation(Controller.class);
 //                    controllerMap.put(controller.name().equals("")?cls.getName():controller.name(),cls);
                 }
@@ -75,20 +94,20 @@ public class ClassScanner
         return controllerMap;
     }
 
-    public static Map<String,Class<?>> getServiceMap(String packageName) throws Exception
+    public static Map<String, Class<?>> getServiceMap (String packageName) throws Exception
     {
-        if(serviceMap ==null)
+        if(serviceMap == null)
         {
-            Set<Class<?>> classes=getBeanClasses(packageName);
-            if(classes==null||classes.isEmpty())
+            Set<Class<?>> classes = getBeanClasses(packageName);
+            if(classes == null || classes.isEmpty())
                 return serviceMap;
 
-            serviceMap =new HashMap<>(64);
-            for (Class<?> cls:classes)
+            serviceMap = new HashMap<>();
+            for (Class<?> cls : classes)
             {
                 if(cls.isAnnotationPresent(Service.class))
                 {
-                    serviceMap.put(cls.getName(),cls);
+                    serviceMap.put(cls.getName(), cls);
 //                    Service service=cls.getAnnotation(Service.class);
 //                    serviceMap.put(service.name().equals("")?cls.getName():service.name(),cls);
                 }
@@ -97,40 +116,41 @@ public class ClassScanner
         return serviceMap;
     }
 
-    public static Map<Class<?>,Integer> getInterceptorMap(String packageName) throws Exception
+    public static Map<Class<?>, Integer> getInterceptorMap (String packageName) throws Exception
     {
-        if(interceptorMap ==null)
+        if(interceptorMap == null)
         {
-            Set<Class<?>> classes=getBeanClasses(packageName);
-            if(classes==null||classes.isEmpty())
+            Set<Class<?>> classes = getBeanClasses(packageName);
+            if(classes == null || classes.isEmpty())
                 return interceptorMap;
 
-            interceptorMap =new HashMap<>(64);
-            for (Class<?> cls:classes)
+            interceptorMap = new HashMap<>();
+            for (Class<?> cls : classes)
             {
                 if(cls.isAnnotationPresent(Interceptor.class))
                 {
-                    Interceptor interceptor=cls.getAnnotation(Interceptor.class);
-                    interceptorMap.put(cls,interceptor.order());
+                    Interceptor interceptor = cls.getAnnotation(Interceptor.class);
+                    interceptorMap.put(cls, interceptor.order());
                 }
             }
         }
         return interceptorMap;
     }
 
-    public static Set<Class<?>> getBeanClasses(String packageName) throws Exception
+    public static Set<Class<?>> getBeanClasses (String packageName) throws Exception
     {
-        if(beanClasses==null)
+        if(beanClasses == null)
         {
-            Set<Class<?>> classes=getClasses(packageName);
-            if(classes==null||classes.isEmpty())
+            Set<Class<?>> classes = getClasses(packageName);
+            if(classes == null || classes.isEmpty())
                 return beanClasses;
 
-            beanClasses=new HashSet<>(64);
-            for(Class<?> cls:classes)
+            beanClasses = new HashSet<>();
+            for (Class<?> cls : classes)
             {
-                if(cls.isAnnotationPresent(Controller.class)||cls.isAnnotationPresent(Service.class)
-                        ||cls.isAnnotationPresent(Interceptor.class)||cls.isAnnotationPresent(Configuration.class))
+                if(cls.isAnnotationPresent(Controller.class) || cls.isAnnotationPresent(Service.class)
+                        || cls.isAnnotationPresent(Interceptor.class) || cls.isAnnotationPresent(Configuration.class)
+                        || cls.isAnnotationPresent(Aspect.class))
                 {
                     beanClasses.add(cls);
                 }
@@ -139,12 +159,12 @@ public class ClassScanner
         return beanClasses;
     }
 
-    public static Set<Class<?>> getClasses(String packageName) throws Exception
+    public static Set<Class<?>> getClasses (String packageName) throws Exception
     {
-        if(classes==null)
+        if(classes == null)
         {
-            classes=new HashSet<>(64);
-            baseScanner(packageName,classes);
+            classes = new HashSet<>(64);
+            baseScanner(packageName, classes);
         }
         return classes;
     }
@@ -219,7 +239,7 @@ public class ClassScanner
     }
 
 
-    public static void findAndAddClassesInPackageByFile (String packageName,String packagePath, final boolean recursive, Set<Class<?>> classes)
+    public static void findAndAddClassesInPackageByFile (String packageName, String packagePath, final boolean recursive, Set<Class<?>> classes)
     {
         File dir = new File(packagePath);
         if(!dir.exists() || !dir.isDirectory())
