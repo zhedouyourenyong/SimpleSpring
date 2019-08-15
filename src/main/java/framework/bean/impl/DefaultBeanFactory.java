@@ -4,6 +4,7 @@ import framework.annotation.Aspect;
 import framework.annotation.AutoWired;
 import framework.annotation.Resource;
 import framework.bean.BeanFactory;
+import framework.exception.SimpleException;
 import framework.proxy.AbsMethodAdvance;
 import framework.scanner.ClassScanner;
 import framework.util.ReflectionUtil;
@@ -52,7 +53,7 @@ public class DefaultBeanFactory implements BeanFactory
 
     private void startIOC (String packageName) throws Exception
     {
-        Set<Class<?>> beanClasses = ClassScanner.getBeanClasses(packageName);
+        Set<Class<?>> beanClasses = ClassScanner.getIOCBeanClasses(packageName);
 
         if(beanClasses != null && beanClasses.size() != 0)
         {
@@ -90,7 +91,7 @@ public class DefaultBeanFactory implements BeanFactory
                 if(targetBean != null)
                 {
                     Object object = proxyer.createProxyObject(targetBean);
-                    beans.put(targetClassName,object);
+                    beans.put(targetClassName, object);
                 }
             }
         }
@@ -113,17 +114,34 @@ public class DefaultBeanFactory implements BeanFactory
                 if(field.isAnnotationPresent(AutoWired.class))
                 {
                     Class<?> fieldClass = field.getType();
-                    Object fieldInstance = beans.get(fieldClass.getName());
+                    String fieldName = fieldClass.getName();
+                    Object fieldInstance = beans.get(fieldName);
+
+                    if(fieldInstance == null) //接口
+                    {
+                        for (Map.Entry<String, Object> me : beans.entrySet())
+                        {
+                            String name = me.getKey();
+                            Object object = me.getValue();
+                            Class<?> clz = object.getClass();
+                            Class<?>[] interfs = clz.getInterfaces();
+                            if(interfs != null && interfs.length > 0)
+                            {
+                                Class<?> interf = interfs[0];
+                                if(interf.getName().equals(fieldName))
+                                {
+                                    fieldInstance = object;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
                     if(fieldInstance != null)
                         ReflectionUtil.setField(value, field, fieldInstance);
+                    else
+                        throw new SimpleException(fieldName + " not found!");
                 }
-//                } else if(field.isAnnotationPresent(Resource.class))
-//                {
-//                    Resource resource = field.getAnnotation(Resource.class);
-//                    Object fieldInstance = beans.get(resource.name());
-//                    if(fieldInstance != null)
-//                        ReflectionUtil.setField(key, field, fieldInstance);
-//                }
             }
         }
     }

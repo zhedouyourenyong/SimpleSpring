@@ -38,28 +38,28 @@ public class InterceptManager
 
     public List<SimpleInterceptor> loadInterceptors (String packageName) throws Exception
     {
-        if(interceptorList==null)
+        if(interceptorList == null)
         {
-            interceptorList=new ArrayList<>(8);
-            Map<Class<?>,Integer> interceptMap=ClassScanner.getInterceptorMap(packageName);
-            for(Map.Entry<Class<?>,Integer> entry:interceptMap.entrySet())
+            interceptorList = new ArrayList<>(8);
+            Map<Class<?>, Integer> interceptMap = ClassScanner.getInterceptorMap(packageName);
+            for (Map.Entry<Class<?>, Integer> entry : interceptMap.entrySet())
             {
-                Class<?> cls=entry.getKey();
-                Integer order=entry.getValue();
-                SimpleInterceptor interceptor=(SimpleInterceptor) ReflectionUtil.newInstance(cls);
+                Class<?> cls = entry.getKey();
+                Integer order = entry.getValue();
+                SimpleInterceptor interceptor = (SimpleInterceptor) ReflectionUtil.newInstance(cls);
                 interceptor.setOrder(order);
                 interceptorList.add(interceptor);
             }
-            Collections.sort(interceptorList,new OrderComparator());
+            Collections.sort(interceptorList, new OrderComparator());
         }
         return interceptorList;
     }
 
     public boolean processBefore (Param param) throws Exception
     {
-        for(SimpleInterceptor interceptor:interceptorList)
+        for (SimpleInterceptor interceptor : interceptorList)
         {
-            boolean result=interceptor.before(ContextManager.getContext(),param);
+            boolean result = interceptor.before(ContextManager.getContext(), param);
             if(!result)
                 return result;
         }
@@ -68,9 +68,9 @@ public class InterceptManager
 
     public void processAfter (Param param) throws Exception
     {
-        for(SimpleInterceptor interceptor:interceptorList)
+        for (SimpleInterceptor interceptor : interceptorList)
         {
-            interceptor.after(ContextManager.getContext(),param);
+            interceptor.after(ContextManager.getContext(), param);
         }
     }
 }

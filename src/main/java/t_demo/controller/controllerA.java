@@ -1,16 +1,13 @@
 package t_demo.controller;
 
-
 import com.alibaba.fastjson.JSONObject;
+import t_demo.interF.gg;
 import t_demo.proxy.Test;
 import t_demo.service.serviceA;
 import framework.annotation.AutoWired;
 import framework.annotation.Controller;
 import framework.annotation.RequestMapping;
-import framework.constant.Constant;
 import framework.context.Context;
-import framework.protocol.response.impl.SimpleHttpResponse;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,14 +15,25 @@ import java.util.Map;
 public class controllerA
 {
     @AutoWired
-    serviceA servicea;
+    serviceA serviceaa;
 
     @AutoWired
     Test test;
 
+    @AutoWired
+    gg g;
+
     @RequestMapping(path = "/testA")
     public void map1(Context context)
     {
+        if(g!=null)
+        {
+            System.out.println("yes");
+            g.say();
+        }
+        else
+            System.out.println("No");
+
         Map<String,Object> model=new HashMap<>();
         model.put("name","zzh");
 

@@ -20,7 +20,7 @@ public class ClassScanner
 
     private static Set<Class<?>> classes = null;
     private static Set<Class<?>> beanClasses = null;  // controller service interceptor configuration
-
+    private static Set<Class<?>> IOCBeanClasses = null;  //controller,service
     private static Map<String, Class<?>> controllerMap = null;
     private static Map<String, Class<?>> serviceMap = null;
     private static Map<Class<?>, Integer> interceptorMap = null;
@@ -86,8 +86,6 @@ public class ClassScanner
                 if(cls.isAnnotationPresent(Controller.class))
                 {
                     controllerMap.put(cls.getName(), cls);
-//                    Controller controller=cls.getAnnotation(Controller.class);
-//                    controllerMap.put(controller.name().equals("")?cls.getName():controller.name(),cls);
                 }
             }
         }
@@ -135,6 +133,26 @@ public class ClassScanner
             }
         }
         return interceptorMap;
+    }
+
+    public static Set<Class<?>> getIOCBeanClasses (String packageName) throws Exception
+    {
+        if(IOCBeanClasses == null)
+        {
+            Set<Class<?>> beanClasses = getBeanClasses(packageName);
+            IOCBeanClasses = new HashSet<>();
+            if(beanClasses == null || beanClasses.size() == 0)
+                return IOCBeanClasses;
+
+            for (Class<?> cls : classes)
+            {
+                if(cls.isAnnotationPresent(Controller.class) || cls.isAnnotationPresent(Service.class))
+                {
+                    IOCBeanClasses.add(cls);
+                }
+            }
+        }
+        return IOCBeanClasses;
     }
 
     public static Set<Class<?>> getBeanClasses (String packageName) throws Exception

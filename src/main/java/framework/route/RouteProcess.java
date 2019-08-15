@@ -43,40 +43,39 @@ public final class RouteProcess
 
         Object[] object = parseRouteParameter(method);
 
-        String beanName=method.getDeclaringClass().getName();
+        String beanName = method.getDeclaringClass().getName();
         Object bean = beanManager.getBean(beanName);
 
-        Object result=null;
-        if(bean!=null)
-            result=ReflectionUtil.invokeMethod(bean,method,object);
+        Object result = null;
+        if(bean != null)
+            result = ReflectionUtil.invokeMethod(bean, method, object);
         else
-            throw new SimpleException("没有找到["+method.getName()+"]对应的bean");
+            throw new SimpleException("没有找到[" + method.getName() + "]对应的bean");
         return result;
     }
 
 
     private Object[] parseRouteParameter (Method method) throws IllegalAccessException, InstantiationException, NoSuchFieldException
     {
-        Class<?>[] parameterTypes=method.getParameterTypes();
+        Class<?>[] parameterTypes = method.getParameterTypes();
 
-        if(parameterTypes==null)
+        if(parameterTypes == null)
             return null;
-        if(parameterTypes.length>2)
+        if(parameterTypes.length > 2)
             throw new SimpleException(StatusEnum.ILLEGAL_PARAMETER);
 
-        Object[] parameterInstances=new Object[parameterTypes.length];
+        Object[] parameterInstances = new Object[parameterTypes.length];
 
-        for(int i=0;i<parameterInstances.length;i++)
+        for (int i = 0; i < parameterInstances.length; i++)
         {
-            if(parameterTypes[i]==Context.class)
+            if(parameterTypes[i] == Context.class)
             {
-                parameterInstances[i]=ContextManager.getContext();
-            }else if(parameterTypes[i]== Param.class)
+                parameterInstances[i] = ContextManager.getContext();
+            } else if(parameterTypes[i] == Param.class)
             {
-                parameterInstances[i]=ContextManager.getContext().getParam();
+                parameterInstances[i] = ContextManager.getContext().getParam();
             }
         }
-
         return parameterInstances;
     }
 
